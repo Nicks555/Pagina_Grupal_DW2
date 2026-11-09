@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ragnarok eSports | Plataforma Oficial</title>
+  
+  <!-- jQuery 3.7.1 CDN -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ========== VARIABLES GLOBALES Y TEMAS ========== */
+    :root {
+      /* MODO OSCURO (Por defecto) */
+      --bg-dark: #07090B;
+      --panel-bg: #111418;
+      --card-bg: #1A1F26;
+      --border: #2A313C;
+      --text-light: #E5E7EB;
+      --text-muted: #9CA3AF;
+      
+      /* Colores de Marca */
+      --green-main: #00FF41;
+      --green-dark: #008F11;
+      --green-glow: rgba(0, 255, 65, 0.3);
+      --red: #EF4444;
+      --yellow: #FACC15;
+      --sidebar-width: 260px;
+    }
+
+    /* MODO CLARO */
+    body.light-mode {
+      --bg-dark: #F3F4F6;
+      --panel-bg: #FFFFFF;
+      --card-bg: #F9FAFB;
+      --border: #D1D5DB;
+      --text-light: #111827;
+      --text-muted: #6B7280;
+      
+      --green-main: #059669;
+      --green-dark: #047857;
+      --green-glow: rgba(5, 150, 105, 0.2);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-light);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    h1, h2, h3, h4 { font-family: 'Orbitron', sans-serif; letter-spacing: 1px; }
+    button { font-family: 'Rajdhani', sans-serif; cursor: pointer; transition: 0.3s; }
+
+    /* Transiciones suaves para todos los elementos del tema */
+    .sidebar, .main-panel, .right-panel, .card, .cart-item, .log-item, input, select, textarea, .panel-header, .cart-footer, .tabs-header {
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+
+    /* ========== NAVBAR SUPERIOR ========== */
+    #navbar {
+      height: 60px;
+      background: var(--panel-bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+    .nav-left { display: flex; align-items: center; gap: 15px; }
+    .logo { font-family: 'Orbitron'; font-size: 1.2rem; color: var(--green-main); text-shadow: 0 0 10px var(--green-glow); display: flex; align-items: center; gap: 8px; }
+    .nav-right { display: flex; align-items: center; gap: 15px; }
+    
+    .status-indicator {
+      color: var(--green-main);
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-dot { width: 8px; height: 8px; background: var(--green-main); border-radius: 50%; box-shadow: 0 0 8px var(--green-main); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    .theme-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-light);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    .theme-toggle-btn:hover { border-color: var(--green-main); color: var(--green-main); }
+
+    /* ========== DASHBOARD CONTAINER ========== */
+    .dashboard-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: var(--sidebar-width) 1fr 380px;
+      gap: 15px;
+      padding: 15px;
+      overflow: hidden;
+      height: calc(100vh - 60px);
+    }
+
+    /* ========== SIDEBAR IZQUIERDO ========== */
+    .sidebar {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .sidebar-header {
+      padding: 15px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar-header img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid var(--green-main); }
+    .sidebar-header span { font-family: 'Orbitron'; font-size: 0.9rem; color: var(--green-main); }
+
+    .sidebar-nav { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 5px; overflow-y: auto; }
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.85rem;
+      border: none;
+      background: transparent;
+      text-align: left;
+      width: 100%;
+    }
+    .nav-btn:hover { background: rgba(0, 255, 65, 0.05); color: var(--green-main); }
+    .nav-btn.active { background: rgba(0, 255, 65, 0.1); color: var(--green-main); border-left: 3px solid var(--green-main); }
+    .nav-icon { font-size: 1.1rem; width: 20px; text-align: center; }
+
+    .sidebar-footer { padding: 15px; border-top: 1px solid var(--border); font-size: 0.7rem; color: var(--text-muted); text-align: center; }
+
+    /* ========== PANEL PRINCIPAL (CENTRO) ========== */
+    .main-panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 15px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .panel-header h2 { font-size: 1.1rem; color: var(--text-light); }
+
+    .search-box input {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-light);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      outline: none;
+      width: 180px;
+    }
+    .search-box input:focus { border-color: var(--green-main); }
+
+    .content-area {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+    }
+
+    /* ========== TARJETAS (CARDS) ========== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .card:hover { transform: translateY(-3px); border-color: var(--green-main); box-shadow: 0 4px 15px var(--green-glow); }
+    .card img { width: 100%; height: 120px; object-fit: cover; }
+    .card-body { padding: 10px; flex: 1; display: flex; flex-direction: column; }
+    .card-body h3 { font-size: 0.95rem; margin-bottom: 4px; }
+    .card-body p { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .card-body .price { color: var(--green-main); font-weight: 800; font-size: 1.1rem; margin-top: auto; }
+    
+    .badge {
+      display: inline-block;
+      background: rgba(0, 255, 65, 0.15);
+      color: var(--green-main);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .btn {
+      padding: 8px 15px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      border: none;
+      background: var(--green-dark);
+      color: #fff;
+      text-transform: uppercase;
+    }
+    .btn:hover { background: var(--green-main); color: #fff; box-shadow: 0 0 10px var(--green-glow); }
+    .btn-sm { padding: 5px 10px; font-size: 0.75rem; }
+    .btn-block { width: 100%; }
+
+    /* ========== FORMULARIOS ========== */
+    .form-group { margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; }
+    .form-group input, .form-group select, .form-group textarea {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-light);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-family: 'Rajdhani', sans-serif;
+      outline: none;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--green-main); }
+    .form-group input.error, .form-group select.error { border-color: var(--red); box-shadow: 0 0 5px rgba(239, 68, 68, 0.3); }
+    .error-msg { color: var(--red); font-size: 0.75rem; display: none; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* ========== PANEL DERECHO (CARRITO / BITÁCORA) ========== */
+    .right-panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .tabs-header {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.85rem;
+      border-bottom: 2px solid transparent;
+    }
+    .tab-btn.active { color: var(--green-main); border-bottom-color: var(--green-main); background: rgba(0, 255, 65, 0.05); }
+
+    .tab-content { flex: 1; display: none; flex-direction: column; overflow: hidden; }
+    .tab-content.active { display: flex; }
+
+    /* Carrito */
+    .cart-list { flex: 1; overflow-y: auto; padding: 10px; }
+    .cart-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cart-item-info h4 { font-size: 0.85rem; margin-bottom: 2px; }
+    .cart-item-info p { font-size: 0.75rem; color: var(--text-muted); }
+    .cart-item-info .subtotal { color: var(--green-main); font-weight: 700; font-size: 0.9rem; margin-top: 4px; display: block; }
+    .cart-controls { display: flex; align-items: center; gap: 8px; }
+    .qty-btn {
+      width: 24px; height: 24px; border-radius: 4px;
+      background: var(--border); color: var(--text-light);
+      border: none; font-weight: bold;
+    }
+    .qty-btn:hover { background: var(--green-main); color: #fff; }
+    .remove-btn { background: transparent; border: none; color: var(--red); font-size: 1rem; cursor: pointer; }
+    
+    .cart-footer {
+      padding: 15px;
+      border-top: 1px solid var(--border);
+      background: var(--panel-bg);
+    }
+    .cart-totals { margin-bottom: 10px; }
+    .cart-totals p { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px; color: var(--text-muted); }
+    .cart-totals h3 { display: flex; justify-content: space-between; font-size: 1.1rem; color: var(--green-main); }
+
+    /* Bitácora */
+    .log-list { flex: 1; overflow-y: auto; padding: 10px; }
+    .log-item {
+      background: var(--card-bg);
+      border-left: 3px solid var(--green-main);
+      border-radius: 4px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+    .log-item h4 { font-size: 0.85rem; margin-bottom: 4px; }
+    .log-item p { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
+    .log-item .log-time { font-size: 0.7rem; color: var(--green-main); font-family: monospace; }
+
+    .empty-msg { text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 20px; font-style: italic; }
+
+    /* ========== RELOJ Y TIMESTAMP ========== */
+    .clock-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--green-main);
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      margin-bottom: 15px;
+      box-shadow: 0 0 15px var(--green-glow);
+    }
+    .clock-time { font-family: 'Orbitron'; font-size: 2rem; color: var(--green-main); margin: 5px 0; }
+    .clock-date { font-size: 0.9rem; color: var(--text-muted); }
+    .clock-timestamp { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px; }
+
+    /* ========== TOAST ========== */
+    .toast {
+      position: fixed;
+      top: 70px;
+      right: 20px;
+      background: var(--panel-bg);
+      border: 1px solid var(--green-main);
+      border-radius: 8px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 0 20px var(--green-glow);
+      z-index: 2000;
+      display: none;
+    }
+    .toast-icon { background: var(--green-main); color: #fff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .toast-content h4 { color: var(--green-main); font-size: 0.9rem; }
+    .toast-content p { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 1200px) {
+      .dashboard-container { grid-template-columns: var(--sidebar-width) 1fr; }
+      .right-panel { display: none; }
+    }
+    @media (max-width: 768px) {
+      body { height: auto; overflow-y: auto; }
+      .dashboard-container { display: flex; flex-direction: column; height: auto; overflow: visible; }
+      .sidebar { flex-direction: row; flex-wrap: wrap; height: auto; }
+      .sidebar-nav { flex-direction: row; flex-wrap: wrap; }
+      .nav-btn { width: auto; border-left: none; border-bottom: 3px solid transparent; }
+      .nav-btn.active { border-left: none; border-bottom-color: var(--green-main); }
+      .main-panel { height: 600px; }
+      .right-panel { display: flex; height: 400px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<header id="navbar">
+  <div class="nav-left">
+    <div class="logo">⚡ RAGNAROK ESPORTS</div>
+  </div>
+  <div class="nav-right">
+    <div class="status-indicator">
+      <div class="status-dot"></div>
+      <span id="clockNav">00:00:00</span>
+    </div>
+    <!-- Botón de Tema (Inicia en modo oscuro con la luna) -->
+    <button class="theme-toggle-btn" id="themeBtn" title="Cambiar tema">🌙</button>
+  </div>
+</header>
+
+<!-- ================= DASHBOARD ================= -->
+<div class="dashboard-container">
+
+  <!-- ===== SIDEBAR IZQUIERDO ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <!-- Imagen de placeholder para evitar errores si no tienes el logo -->
+      <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=100&auto=format&fit=crop" alt="Logo">
+      <span>MENÚ</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-btn active" data-section="inicio"><span class="nav-icon">🏠</span> Inicio</button>
+      <button class="nav-btn" data-section="equipo"><span class="nav-icon">👥</span> Equipo</button>
+      <button class="nav-btn" data-section="torneos"><span class="nav-icon">🏆</span> Torneos</button>
+      <button class="nav-btn" data-section="inscripcion"><span class="nav-icon">📝</span> Inscripción</button>
+      <button class="nav-btn" data-section="tienda"><span class="nav-icon">🛒</span> Tienda Oficial</button>
+      <button class="nav-btn" data-section="contacto"><span class="nav-icon">📞</span> Contacto</button>
+    </nav>
+    <div class="sidebar-footer">© 2026 Ragnarok eSports</div>
+  </aside>
+
+  <!-- ===== PANEL PRINCIPAL (CENTRO) ===== -->
+  <main class="main-panel">
+    
+    <!-- SECCIÓN INICIO -->
+    <div class="page-section active" id="page-inicio">
+      <div class="panel-header">
+        <h2>Bienvenido a Ragnarok</h2>
+      </div>
+      <div class="content-area">
+        <div style="text-align:center; padding: 30px 15px; background: radial-gradient(circle, var(--green-glow) 0%, transparent 70%); border-radius: 10px; margin-bottom: 20px;">
+          <h1 style="color: var(--green-main); font-size: 2rem; margin-bottom: 10px;">RAGNAROK ESPORTS</h1>
+          <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto 15px;">El destino no está escrito, se forja en la batalla. Competimos al más alto nivel en Valorant, CS2 y LoL.</p>
+        </div>
+        <div class="cards-grid">
+          <div class="card"><div class="card-body"><h3>7</h3><p>Jugadores</p></div></div>
+          <div class="card"><div class="card-body"><h3>3</h3><p>Juegos</p></div></div>
+          <div class="card"><div class="card-body"><h3>4</h3><p>Torneos Activos</p></div></div>
+          <div class="card"><div class="card-body"><h3>12+</h3><p>Victorias</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN EQUIPO -->
+    <div class="page-section" id="page-equipo" style="display:none;">
+      <div class="panel-header">
+        <h2>Nuestro Equipo</h2>
+        <div class="search-box">
+          <select id="filtroJuegoEquipo" style="background:var(--card-bg); border:1px solid var(--border); color:var(--text-light); padding:5px; border-radius:20px; outline:none;">
+            <option value="todos">Todos los juegos</option>
+            <option value="valorant">Valorant</option>
+            <option value="cs2">CS2</option>
+            <option value="lol">LoL</option>
+          </select>
+        </div>
+      </div>
+      <div class="content-area">
+        <div class="cards-grid" id="equipoGrid">
+          <div class="card equipo-card" data-juego="valorant"><div class="card-body"><span class="badge">Valorant</span><h3>Yupix</h3><p>Duelist</p></div></div>
+          <div class="card equipo-card" data-juego="valorant"><div class="card-body"><span class="badge">Valorant</span><h3>Harit</h3><p>Support</p></div></div>
+          <div class="card equipo-card" data-juego="cs2"><div class="card-body"><span class="badge">CS2</span><h3>Chizin</h3><p>IGL</p></div></div>
+          <div class="card equipo-card" data-juego="cs2"><div class="card-body"><span class="badge">CS2</span><h3>Kael</h3><p>Entry Fragger</p></div></div>
+          <div class="card equipo-card" data-juego="lol"><div class="card-body"><span class="badge">LoL</span><h3>Nero</h3><p>Mid Laner</p></div></div>
+          <div class="card equipo-card" data-juego="lol"><div class="card-body"><span class="badge">LoL</span><h3>Lynx</h3><p>Jungla</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN TORNEOS -->
+    <div class="page-section" id="page-torneos" style="display:none;">
+      <div class="panel-header">
+        <h2>Torneos Activos</h2>
+      </div>
+      <div class="content-area">
+        <div class="cards-grid">
+          <div class="card">
+            <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&auto=format&fit=crop" alt="Torneo">
+            <div class="card-body">
+              <span class="badge">Valorant</span>
+              <h3>Chukuta Gamer 2026</h3>
+              <p>12 - 18 Junio 2026</p>
+              <p style="color:var(--green-main); font-weight:700;">En cuartos de final</p>
+            </div>
+          </div>
+          <div class="card">
+            <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&auto=format&fit=crop" alt="Torneo">
+            <div class="card-body">
+              <span class="badge">Valorant</span>
+              <h3>Latam Championship</h3>
+              <p>26 - 28 Junio 2026</p>
+              <p style="color:var(--green-main); font-weight:700;">Fase de grupos</p>
+            </div>
+          </div>
+          <div class="card">
+            <img src="https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=400&auto=format&fit=crop" alt="Torneo">
+            <div class="card-body">
+              <span class="badge">CS2</span>
+              <h3>Liga Boliviana CS2</h3>
+              <p>Mayo - Julio 2026</p>
+              <p style="color:var(--green-main); font-weight:700;">En curso</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN INSCRIPCIÓN -->
+    <div class="page-section" id="page-inscripcion" style="display:none;">
+      <div class="panel-header">
+        <h2>Inscripción de Equipos</h2>
+      </div>
+      <div class="content-area">
+        <div id="inscripcionSuccess" style="display:none; background:rgba(0,255,65,0.1); border:1px solid var(--green-main); color:var(--green-main); padding:10px; border-radius:6px; margin-bottom:15px;"></div>
+        
+        <form id="formInscripcion" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nombre del Equipo *</label>
+              <input type="text" id="teamName" placeholder="Ej: Ragnarok Alpha">
+              <span class="error-msg" id="err-teamName">Solo se permiten letras.</span>
+            </div>
+            <div class="form-group">
+              <label>Juego *</label>
+              <select id="teamGame">
+                <option value="">Seleccionar juego</option>
+                <option value="valorant">Valorant</option>
+                <option value="cs2">CS2</option>
+                <option value="lol">League of Legends</option>
+              </select>
+              <span class="error-msg" id="err-teamGame">Selecciona un juego.</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nombre del Capitán *</label>
+              <input type="text" id="teamCaptain" placeholder="Nombre completo">
+              <span class="error-msg" id="err-teamCaptain">Solo se permiten letras.</span>
+            </div>
+            <div class="form-group">
+              <label>Correo *</label>
+              <input type="email" id="teamEmail" placeholder="correo@ejemplo.com">
+              <span class="error-msg" id="err-teamEmail">Correo inválido.</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Teléfono *</label>
+            <input type="tel" id="teamPhone" placeholder="+591 700-00000">
+            <span class="error-msg" id="err-teamPhone">Mínimo 8 dígitos.</span>
+          </div>
+          <button type="submit" class="btn btn-block">✅ Enviar Inscripción</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- SECCIÓN TIENDA -->
+    <div class="page-section" id="page-tienda" style="display:none;">
+      <div class="panel-header">
+        <h2>Tienda Oficial</h2>
+        <div class="search-box">
+          <input type="text" id="searchTienda" placeholder="🔍 Buscar...">
+        </div>
+      </div>
+      <div class="content-area">
+        <div class="cards-grid" id="tiendaGrid">
+          <!-- Inyectado por JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN CONTACTO -->
+    <div class="page-section" id="page-contacto" style="display:none;">
+      <div class="panel-header">
+        <h2>Contacto</h2>
+      </div>
+      <div class="content-area">
+        <div class="clock-panel">
+          <div class="clock-date" id="clockDate">Cargando...</div>
+          <div class="clock-time" id="clockTime">00:00:00</div>
+          <div class="clock-timestamp">Timestamp: <span id="clockTimestamp">0</span></div>
+        </div>
+        <div class="cards-grid">
+          <div class="card"><div class="card-body"><h3>📍 Ubicación</h3><p>Av. Gamer 1234</p></div></div>
+          <div class="card"><div class="card-body"><h3>📞 Teléfono</h3><p>+591 700-12345</p></div></div>
+          <div class="card"><div class="card-body"><h3>✉️ Email</h3><p>info@ragnarok.com</p></div></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ===== PANEL DERECHO (TABS) ===== -->
+  <aside class="right-panel">
+    <div class="tabs-header">
+      <button class="tab-btn active" data-tab="carrito">🛒 Carrito</button>
+      <button class="tab-btn" data-tab="bitacora">📋 Bitácora</button>
+    </div>
+
+    <!-- Pestaña Carrito -->
+    <div class="tab-content active" id="tab-carrito">
+      <div class="cart-list" id="cartList">
+        <p class="empty-msg">Tu carrito está vacío</p>
+      </div>
+      <div class="cart-footer">
+        <div class="cart-totals">
+          <p>Subtotal: <span id="cartSubtotal">$0</span></p>
+          <p>Envío: <span>$5</span></p>
+          <h3>Total: <span id="cartTotal">$0</span></h3>
+        </div>
+        <button class="btn btn-block" id="btnCheckout">Proceder al Pago</button>
+      </div>
+    </div>
+
+    <!-- Pestaña Bitácora -->
+    <div class="tab-content" id="tab-bitacora">
+      <div class="log-list" id="logList">
+        <p class="empty-msg">No hay actividad registrada</p>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- ================= MODAL CHECKOUT ================= -->
+<div id="modalCheckout" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
+  <div style="background:var(--panel-bg); border:1px solid var(--green-main); border-radius:10px; padding:20px; width:90%; max-width:400px; position:relative;">
+    <button id="closeModal" style="position:absolute; top:10px; right:10px; background:transparent; border:none; color:var(--text-light); font-size:1.2rem; cursor:pointer;">×</button>
+    <h3 style="color:var(--green-main); margin-bottom:15px;">Confirmar Pedido</h3>
+    
+    <div class="form-group">
+      <label>Nombre Completo *</label>
+      <input type="text" id="checkoutName" placeholder="Tu nombre">
+      <span class="error-msg" id="err-checkoutName">Solo letras.</span>
+    </div>
+    <div class="form-group">
+      <label>Teléfono *</label>
+      <input type="tel" id="checkoutPhone" placeholder="700-00000">
+      <span class="error-msg" id="err-checkoutPhone">Mínimo 8 dígitos.</span>
+    </div>
+    
+    <div style="display:flex; justify-content:space-between; font-weight:bold; margin:15px 0; padding-top:10px; border-top:1px solid var(--border);">
+      <span>Total a Pagar:</span>
+      <span id="modalTotal" style="color:var(--green-main);">$0</span>
+    </div>
+
+    <button class="btn btn-block" id="btnConfirmOrder">✅ Confirmar Pedido</button>
+  </div>
+</div>
+
+<!-- ================= TOAST ================= -->
+<div class="toast" id="toast">
+  <div class="toast-icon">✓</div>
+  <div class="toast-content">
+    <h4 id="toastTitle">¡Pedido Confirmado!</h4>
+    <p id="toastMsg">Tu pedido ha sido registrado.</p>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    // ==========================================
+    // 1. DATOS Y VARIABLES GLOBALES
+    // ==========================================
+    let carrito = [];
+    let bitacora = [];
+    const ENVIO = 5;
+
+    const productos = [
+      { id: 1, nombre: 'Polera Oficial', cat: 'ropa', precio: 25, img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400' },
+      { id: 2, nombre: 'Gorra Ragnarok', cat: 'ropa', precio: 15, img: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400' },
+      { id: 3, nombre: 'Mouse Gaming RGB', cat: 'perifericos', precio: 40, img: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=400' },
+      { id: 4, nombre: 'Teclado Mecánico', cat: 'perifericos', precio: 85, img: 'https://images.unsplash.com/photo-1595225476474-87563907a212?w=400' },
+      { id: 5, nombre: 'Tomatodo Gamer', cat: 'accesorios', precio: 10, img: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400' },
+      { id: 6, nombre: 'Mochila Gaming', cat: 'accesorios', precio: 55, img: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400' }
+    ];
+
+    // ==========================================
+    // 2. LÓGICA DEL MODO CLARO / OSCURO
+    // ==========================================
+    $('#themeBtn').on('click', function() {
+      $('body').toggleClass('light-mode');
+      
+      if ($('body').hasClass('light-mode')) {
+        $(this).html('☀️');
+        mostrarToast('Modo Claro', 'La interfaz ha cambiado a modo claro.');
+      } else {
+        $(this).html('🌙');
+        mostrarToast('Modo Oscuro', 'La interfaz ha cambiado a modo oscuro.');
+      }
+    });
+
+    // ==========================================
+    // 3. RELOJ Y TIEMPO
+    // ==========================================
+    function actualizarReloj() {
+      const ahora = new Date();
+      const h = String(ahora.getHours()).padStart(2, '0');
+      const m = String(ahora.getMinutes()).padStart(2, '0');
+      const s = String(ahora.getSeconds()).padStart(2, '0');
+      const horaStr = `${h}:${m}:${s}`;
+      
+      $('#clockNav').text(horaStr);
+      $('#clockTime').text(horaStr);
+      
+      const dias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+      const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      $('#clockDate').text(`${dias[ahora.getDay()]}, ${ahora.getDate()} de ${meses[ahora.getMonth()]} de ${ahora.getFullYear()}`);
+      $('#clockTimestamp').text(Date.now());
+    }
+    setInterval(actualizarReloj, 1000);
+    actualizarReloj();
+
+    // ==========================================
+    // 4. NAVEGACIÓN ENTRE SECCIONES (Sidebar)
+    // ==========================================
+    $('.nav-btn').on('click', function() {
+      $('.nav-btn').removeClass('active');
+      $(this).addClass('active');
+      
+      const section = $(this).data('section');
+      $('.page-section').hide();
+      $('#page-' + section).fadeIn(300);
+      
+      agregarBitacora('Navegación', `Ingresó a la sección: ${section}`);
+    });
+
+    // ==========================================
+    // 5. PESTAÑAS (Carrito / Bitácora)
+    // ==========================================
+    $('.tab-btn').on('click', function() {
+      $('.tab-btn').removeClass('active');
+      $(this).addClass('active');
+      
+      const tab = $(this).data('tab');
+      $('.tab-content').removeClass('active');
+      $('#tab-' + tab).addClass('active');
+    });
+
+    // ==========================================
+    // 6. RENDERIZAR TIENDA
+    // ==========================================
+    function renderizarTienda(filtro = '') {
+      const $grid = $('#tiendaGrid');
+      $grid.empty();
+      
+      const filtrados = productos.filter(p => p.nombre.toLowerCase().includes(filtro.toLowerCase()));
+      
+      if (filtrados.length === 0) {
+        $grid.html('<p class="empty-msg" style="grid-column:1/-1;">No se encontraron productos.</p>');
+        return;
+      }
+
+      filtrados.forEach(p => {
+        $grid.append(`
+          <div class="card">
+            <img src="${p.img}" alt="${p.nombre}">
+            <div class="card-body">
+              <span class="badge">${p.cat}</span>
+              <h3>${p.nombre}</h3>
+              <p class="price">$${p.precio}</p>
+              <button class="btn btn-sm btn-block btn-add-cart" data-id="${p.id}">Añadir al Carrito</button>
+            </div>
+          </div>
+        `);
+      });
+    }
+    renderizarTienda();
+
+    $('#searchTienda').on('keyup', function() {
+      renderizarTienda($(this).val());
+    });
+
+    // ==========================================
+    // 7. LÓGICA DEL CARRITO
+    // ==========================================
+    $(document).on('click', '.btn-add-cart', function() {
+      const id = $(this).data('id');
+      const producto = productos.find(p => p.id === id);
+      
+      const existe = carrito.find(item => item.id === id);
+      
+      if (existe) {
+        existe.cantidad++;
+      } else {
+        carrito.push({ ...producto, cantidad: 1 });
+      }
+      
+      renderizarCarrito();
+      mostrarToast('Añadido al Carrito', `${producto.nombre} agregado.`);
+      agregarBitacora('Carrito', `Añadió ${producto.nombre}`);
+    });
+
+    function renderizarCarrito() {
+      const $list = $('#cartList');
+      $list.empty();
+      
+      if (carrito.length === 0) {
+        $list.html('<p class="empty-msg">Tu carrito está vacío</p>');
+        $('#cartSubtotal').text('$0');
+        $('#cartTotal').text('$0');
+        return;
+      }
+
+      let subtotal = 0;
+      carrito.forEach((item, index) => {
+        const sub = item.precio * item.cantidad;
+        subtotal += sub;
+        $list.append(`
+          <div class="cart-item">
+            <div class="cart-item-info">
+              <h4>${item.nombre}</h4>
+              <p>$${item.precio} c/u</p>
+              <span class="subtotal">$${sub}</span>
+            </div>
+            <div class="cart-controls">
+              <button class="qty-btn btn-restar" data-index="${index}">-</button>
+              <span>${item.cantidad}</span>
+              <button class="qty-btn btn-sumar" data-index="${index}">+</button>
+              <button class="remove-btn btn-eliminar" data-index="${index}">×</button>
+            </div>
+          </div>
+        `);
+      });
+
+      $('#cartSubtotal').text(`$${subtotal}`);
+      $('#cartTotal').text(`$${subtotal + ENVIO}`);
+    }
+
+    $(document).on('click', '.btn-sumar', function() {
+      const i = $(this).data('index');
+      carrito[i].cantidad++;
+      renderizarCarrito();
+    });
+
+    $(document).on('click', '.btn-restar', function() {
+      const i = $(this).data('index');
+      if (carrito[i].cantidad > 1) {
+        carrito[i].cantidad--;
+      } else {
+        carrito.splice(i, 1);
+      }
+      renderizarCarrito();
+    });
+
+    $(document).on('click', '.btn-eliminar', function() {
+      const i = $(this).data('index');
+      const nombre = carrito[i].nombre;
+      carrito.splice(i, 1);
+      renderizarCarrito();
+      agregarBitacora('Carrito', `Eliminó ${nombre}`);
+    });
+
+    // ==========================================
+    // 8. BITÁCORA
+    // ==========================================
+    function agregarBitacora(tipo, desc) {
+      const ahora = new Date();
+      const hora = ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+      bitacora.unshift({ tipo, desc, hora });
+      renderizarBitacora();
+    }
+
+    function renderizarBitacora() {
+      const $list = $('#logList');
+      $list.empty();
+      
+      if (bitacora.length === 0) {
+        $list.html('<p class="empty-msg">No hay actividad registrada</p>');
+        return;
+      }
+
+      bitacora.slice(0, 20).forEach(item => {
+        $list.append(`
+          <div class="log-item">
+            <h4>${item.tipo}</h4>
+            <p>${item.desc}</p>
+            <span class="log-time">⏱ ${item.hora}</span>
+          </div>
+        `);
+      });
+    }
+
+    // ==========================================
+    // 9. CHECKOUT Y MODAL
+    // ==========================================
+    $('#btnCheckout').on('click', function() {
+      if (carrito.length === 0) {
+        mostrarToast('Carrito vacío', 'Añade productos antes de pagar.');
+        return;
+      }
+      const total = $('#cartTotal').text();
+      $('#modalTotal').text(total);
+      $('#modalCheckout').css('display', 'flex').hide().fadeIn(200);
+    });
+
+    $('#closeModal').on('click', function() {
+      $('#modalCheckout').fadeOut(200);
+    });
+
+    // Validaciones en vivo
+    $('#checkoutName').on('input blur', function() {
+      const val = $(this).val().trim();
+      const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/;
+      if (val !== '' && !regex.test(val)) {
+        $(this).addClass('error');
+        $('#err-checkoutName').show();
+      } else {
+        $(this).removeClass('error');
+        $('#err-checkoutName').hide();
+      }
+    });
+
+    $('#checkoutPhone').on('input blur', function() {
+      const val = $(this).val().trim();
+      const digits = val.replace(/\D/g, '');
+      if (val !== '' && digits.length < 8) {
+        $(this).addClass('error');
+        $('#err-checkoutPhone').show();
+      } else {
+        $(this).removeClass('error');
+        $('#err-checkoutPhone').hide();
+      }
+    });
+
+    $('#btnConfirmOrder').on('click', function() {
+      const nombre = $('#checkoutName').val().trim();
+      const telefono = $('#checkoutPhone').val().trim();
+      const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+      const digits = telefono.replace(/\D/g, '');
+      let valido = true;
+
+      if (!nombre || !regex.test(nombre)) {
+        $('#checkoutName').addClass('error');
+        $('#err-checkoutName').show();
+        valido = false;
+      }
+      if (!telefono || digits.length < 8) {
+        $('#checkoutPhone').addClass('error');
+        $('#err-checkoutPhone').show();
+        valido = false;
+      }
+
+      if (!valido) return;
+
+      const total = $('#cartTotal').text();
+      mostrarToast('¡Pedido Confirmado!', `Gracias ${nombre}. Total: ${total}`);
+      agregarBitacora('Pedido', `Pedido confirmado por ${nombre} - Total: ${total}`);
+      
+      // Limpiar
+      carrito = [];
+      renderizarCarrito();
+      $('#modalCheckout').fadeOut(200);
+      $('#checkoutName').val('');
+      $('#checkoutPhone').val('');
+      $('#checkoutName, #checkoutPhone').removeClass('error');
+      $('.error-msg').hide();
+      
+      // Cambiar a pestaña de bitácora
+      $('.tab-btn[data-tab="bitacora"]').click();
+    });
+
+    // ==========================================
+    // 10. TOAST
+    // ==========================================
+    function mostrarToast(titulo, mensaje) {
+      $('#toastTitle').text(titulo);
+      $('#toastMsg').text(mensaje);
+      $('#toast').slideDown(300);
+      setTimeout(() => $('#toast').fadeOut(300), 3000);
+    }
+
+    // ==========================================
+    // 11. FILTROS EQUIPO
+    // ==========================================
+    $('#filtroJuegoEquipo').on('change', function() {
+      const juego = $(this).val();
+      $('.equipo-card').each(function() {
+        const cardJuego = $(this).data('juego');
+        if (juego === 'todos' || cardJuego === juego) {
+          $(this).fadeIn(200);
+        } else {
+          $(this).fadeOut(200);
+        }
+      });
+    });
+
+    // ==========================================
+    // 12. FORMULARIO INSCRIPCIÓN
+    // ==========================================
+    $('#teamName, #teamCaptain').on('input blur', function() {
+      const val = $(this).val().trim();
+      const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/;
+      const errId = 'err-' + $(this).attr('id');
+      if (val !== '' && !regex.test(val)) {
+        $(this).addClass('error'); $('#' + errId).show();
+      } else {
+        $(this).removeClass('error'); $('#' + errId).hide();
+      }
+    });
+
+    $('#teamEmail').on('input blur', function() {
+      const val = $(this).val().trim();
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (val !== '' && !regex.test(val)) {
+        $(this).addClass('error'); $('#err-teamEmail').show();
+      } else {
+        $(this).removeClass('error'); $('#err-teamEmail').hide();
+      }
+    });
+
+    $('#teamPhone').on('input blur', function() {
+      const digits = $(this).val().replace(/\D/g, '');
+      if (digits.length > 0 && digits.length < 8) {
+        $(this).addClass('error'); $('#err-teamPhone').show();
+      } else {
+        $(this).removeClass('error'); $('#err-teamPhone').hide();
+      }
+    });
+
+    $('#formInscripcion').on('submit', function(e) {
+      e.preventDefault();
+      const name = $('#teamName').val().trim();
+      const game = $('#teamGame').val();
+      const captain = $('#teamCaptain').val().trim();
+      const email = $('#teamEmail').val().trim();
+      const phone = $('#teamPhone').val().trim();
+      
+      if (!name || !game || !captain || !email || !phone) {
+        mostrarToast('Error', 'Completa todos los campos.');
+        return;
+      }
+
+      $('#inscripcionSuccess').text(`✅ ¡Equipo ${name} inscrito para ${game.toUpperCase()}!`).fadeIn();
+      agregarBitacora('Inscripción', `Equipo ${name} inscrito en ${game}`);
+      mostrarToast('Inscripción Exitosa', `${name} registrado.`);
+      
+      this.reset();
+      setTimeout(() => $('#inscripcionSuccess').fadeOut(), 4000);
+    });
+
+  });
+</script>
+
+</body>
+</html>
