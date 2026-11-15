@@ -3,6 +3,19 @@ if (window.innerWidth <= 768 || /Android|iPhone|iPad/i.test(navigator.userAgent)
   console.log("Dispositivo Móvil o Tablet Detectado: Cargando Modo PWA");
 }
 
+// 🆕 REGISTRO DEL SERVICE WORKER (Hace que la página sea instalable y offline)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(registration => {
+        console.log('Service Worker registrado con éxito:', registration.scope);
+      })
+      .catch(error => {
+        console.log('Error al registrar Service Worker:', error);
+      });
+  });
+}
+
 $(document).ready(function() {
   let carrito = [];
   let bitacora = [];
@@ -16,65 +29,23 @@ $(document).ready(function() {
     { id: 4, nombre: 'Teclado Mecánico', cat: 'perifericos', precio: 85, img: 'https://images.unsplash.com/photo-1595225476474-87563907a212?w=400' }
   ];
 
-  // ========================================================
-  // RELOJ PARA LA SECCIÓN DE CONTACTO 🆕
-  // ========================================================
+  // Reloj de contacto
   function actualizarRelojContacto() {
     const ahora = new Date();
     const h = String(ahora.getHours()).padStart(2, '0');
     const m = String(ahora.getMinutes()).padStart(2, '0');
     const s = String(ahora.getSeconds()).padStart(2, '0');
-    
-    // Solo actualiza si los elementos existen en la página (sección de contacto)
-    if ($('#clockTime').length > 0) {
-      $('#clockTime').text(`${h}:${m}:${s}`);
-    }
-    if ($('#clockDate').length > 0) {
-      $('#clockDate').text(ahora.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
-    }
+    if ($('#clockTime').length > 0) $('#clockTime').text(`${h}:${m}:${s}`);
+    if ($('#clockDate').length > 0) $('#clockDate').text(ahora.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
   }
-  
   setInterval(actualizarRelojContacto, 1000);
-  actualizarRelojContacto(); // Ejecución inmediata al cargar la página
+  actualizarRelojContacto();
 
-  // ========================================================
-  // PUNTO 3: SIMULACIÓN DE HIDRATACIÓN SSR (Guía Técnica)
-  // ========================================================
-  function hidratarInterfaz() {
-    let $box = $('#contenedorMenu');
-    
-    // Evitar doble hidratación (Memory Leak prevention)
-    if ($box.attr('data-hidratado') === 'true') return; 
-
-    // Hidratación del botón: adjuntar eventos sin redibujar el DOM
-    $('#btnPWA')
-      .text('Menú Interactivo (Hidratado)')
-      .removeClass('btn-estatico')
-      .addClass('btn-hidratado')
-      .off('click') // LIMPIEZA DE MEMORIA (Punto 2 del PDF)
-      .on('click', function() {
-        $('#sidebar').toggleClass('open'); // Simula abrir el menú lateral
-        mostrarToast('Hidratado', 'El botón ya tiene interactividad jQuery.');
-      });
-
-    $box.attr('data-hidratado', 'true');
-    console.log("Interfaz hidratada correctamente.");
-  }
-
-  // Ejecutar proceso de hidratación tras 500ms (Simula la carga del servidor)
-  setTimeout(hidratarInterfaz, 500);
-
-  // ========================================================
-  // PUNTO 2: PREVENCIÓN DE FUGAS DE MEMORIA (.off() previo)
-  // ========================================================
-  
-  // Filtro en cascada con limpieza
+  // Prevención de Memory Leaks y Lógica de la App
   $(document).off('change', '#capa1').on('change', '#capa1', function() {
     let valor = $(this).val();
     let $capa2 = $('#capa2');
-    
     $capa2.html('<option value="">-- Seleccione opción --</option>').prop('disabled', false);
-
     if (valor === 'pc') {
       $capa2.append('<option value="val">Valorant (Riot)</option>');
       $capa2.append('<option value="cs">CS2 (Steam)</option>');
@@ -97,7 +68,6 @@ $(document).ready(function() {
     }
   });
 
-  // Delegación global de eventos con limpieza previa
   $(document).off('click', '#menuToggle').on('click', '#menuToggle', function() {
     $('#sidebar').toggleClass('open');
   });
@@ -130,21 +100,15 @@ $(document).ready(function() {
     $('.page-section').hide();
     $('#page-' + section).fadeIn(300);
     agregarBitacora('Navegación', `Ingresó a ${section}`);
-
-    if ($(window).width() <= 900) {
-      $('#sidebar').removeClass('open');
-    }
+    if ($(window).width() <= 900) $('#sidebar').removeClass('open');
   });
 
   $(document).off('change', '#filtroJuegoEquipo').on('change', '#filtroJuegoEquipo', function() {
     const juego = $(this).val();
     $('.equipo-card').each(function() {
       const catCard = $(this).data('juego');
-      if (juego === 'todos' || catCard === juego) {
-        $(this).show();
-      } else {
-        $(this).hide();
-      }
+      if (juego === 'todos' || catCard === juego) $(this).show();
+      else $(this).hide();
     });
     agregarBitacora('Filtro', `Equipo filtrado por: ${juego}`);
   });
@@ -158,20 +122,15 @@ $(document).ready(function() {
   $(document).off('click', '.tema-btn').on('click', '.tema-btn', function() {
     const tema = $(this).data('tema');
     const $seccion = $('#page-torneos');
-
     $('.tema-btn').removeClass('activo');
     $(this).addClass('activo');
-
     $seccion.removeClass('tema-valorant tema-cs2 tema-lol');
     $seccion.addClass('tema-' + tema);
-
     let icono = '🎯', titulo = 'Torneos de Valorant';
     if (tema === 'cs2') { icono = '🔫'; titulo = 'Torneos de CS2'; }
     if (tema === 'lol') { icono = '⚔️'; titulo = 'Torneos de LoL'; }
-
     $('#temaIcono').html(icono);
     $('#temaTitulo').text(titulo);
-
     agregarBitacora('Tema', `Cambió a ${tema}`);
   });
 
@@ -234,10 +193,8 @@ $(document).ready(function() {
         </div>
       `);
     });
-    
     const envio = COSTO_ENVIO;
     const total = subtotal + envio;
-    
     $('#cartSubtotal').text(`$${subtotal.toFixed(2)}`);
     $('#cartEnvio').text(`$${envio.toFixed(2)}`);
     $('#cartTotal').text(`$${total.toFixed(2)}`);
@@ -281,17 +238,13 @@ $(document).ready(function() {
 
   $(document).off('click', '#btnCheckout').on('click', '#btnCheckout', function() {
     if (carrito.length === 0) { mostrarToast('Vacío', 'Añade productos.'); return; }
-    
     const subtotal = parseFloat($('#cartSubtotal').text().replace('$', ''));
     const envio = parseFloat($('#cartEnvio').text().replace('$', ''));
     const total = parseFloat($('#cartTotal').text().replace('$', ''));
-
     $('#modalSubtotal').text(`$${subtotal.toFixed(2)}`);
     $('#modalEnvio').text(`$${envio.toFixed(2)}`);
     $('#modalTotal').text(`$${total.toFixed(2)}`);
-
     $('#modalCheckout').css('display', 'flex').hide().fadeIn(200);
-    
     iniciarTemporizador();
   });
 
@@ -304,11 +257,9 @@ $(document).ready(function() {
     clearInterval(timerInterval);
     let tiempoRestante = 15; 
     $('#checkoutTimer').text(`${tiempoRestante}s`);
-
     timerInterval = setInterval(function() {
       tiempoRestante--;
       $('#checkoutTimer').text(`${tiempoRestante}s`);
-
       if (tiempoRestante <= 0) {
         clearInterval(timerInterval);
         $('#modalCheckout').fadeOut(200);
@@ -329,7 +280,6 @@ $(document).ready(function() {
     if (!nombre || !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(nombre)) {
       $('#checkoutName').addClass('error'); $('#err-checkoutName').show(); return;
     }
-    
     clearInterval(timerInterval); 
     mostrarToast('¡Pedido Confirmado!', `Gracias ${nombre}.`);
     agregarBitacora('Pedido', `Confirmado por ${nombre} - Total: ${$('#modalTotal').text()}`);
@@ -347,20 +297,12 @@ $(document).ready(function() {
     setTimeout(() => $('#toast').fadeOut(300), 3000);
   }
 
-  // --- VALIDACIÓN FORMULARIO ---
   const regexLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
   const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   function validarCampo($input, $error, condicion) {
-    if (!condicion) {
-      $input.addClass('error');
-      $error.show();
-      return false;
-    } else {
-      $input.removeClass('error');
-      $error.hide();
-      return true;
-    }
+    if (!condicion) { $input.addClass('error'); $error.show(); return false; } 
+    else { $input.removeClass('error'); $error.hide(); return true; }
   }
 
   $(document).off('input blur', '#teamName').on('input blur', '#teamName', function() {
@@ -386,26 +328,18 @@ $(document).ready(function() {
     const captain = $('#teamCaptain').val().trim();
     const email = $('#teamEmail').val().trim();
     const game = $('#teamGame').val();
-
     let valido = true;
 
     if (!regexLetras.test(name)) { $('#teamName').addClass('error'); $('#err-teamName').show(); valido = false; } 
     else { $('#teamName').removeClass('error'); $('#err-teamName').hide(); }
-
     if (!regexLetras.test(captain)) { $('#teamCaptain').addClass('error'); $('#err-teamCaptain').show(); valido = false; } 
     else { $('#teamCaptain').removeClass('error'); $('#err-teamCaptain').hide(); }
-
     if (!regexEmail.test(email)) { $('#teamEmail').addClass('error'); $('#err-teamEmail').show(); valido = false; } 
     else { $('#teamEmail').removeClass('error'); $('#err-teamEmail').hide(); }
-
     if (game === '') { $('#teamGame').addClass('error'); valido = false; } 
     else { $('#teamGame').removeClass('error'); }
 
-    if (!valido) {
-      mostrarToast('Error', 'Revisa los campos marcados.');
-      return;
-    }
-
+    if (!valido) { mostrarToast('Error', 'Revisa los campos marcados.'); return; }
     $('#inscripcionSuccess').text(`✅ Equipo ${name} inscrito (${game}).`).fadeIn();
     agregarBitacora('Inscripción', `Equipo ${name} - ${game} - ${email}`);
     mostrarToast('Éxito', 'Equipo registrado.');

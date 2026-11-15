@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Ragnarok eSports | Plataforma PWA</title>
 
+  <!-- 🆕 CONFIGURACIÓN PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00FF41">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -72,10 +77,6 @@
     .menu-toggle { display: none; background: transparent; border: 1px solid var(--border); color: var(--text-light); font-size: 1rem; padding: 4px 8px; border-radius: 6px; }
     
     .nav-right { display: flex; align-items: center; gap: 8px; }
-    .status-indicator { color: var(--green-main); font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-    .status-dot { width: 8px; height: 8px; background: var(--green-main); border-radius: 50%; box-shadow: 0 0 8px var(--green-main); animation: pulse 2s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    
     .nav-action-btn {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -225,7 +226,6 @@
     @media (max-width: 768px) {
       body { height: auto; overflow-y: auto; }
       #navbar { padding: 0 10px; }
-      .status-indicator { display: none; }
       .nav-action-btn span { display: none; }
       .nav-action-btn { padding: 6px 8px; font-size: 1.1rem; }
       .theme-toggle-btn { padding: 6px 8px; font-size: 1.1rem; }
@@ -246,21 +246,6 @@
       .right-panel, .side-panel { position: absolute; top: 0; height: 100%; border-radius: 20px; width: 100%; }
       #navbar { max-width: 450px; border-radius: 20px 20px 0 0; border: 10px solid #1A1F26; border-bottom: 1px solid var(--border); margin-top: 20px; }
       .cards-grid { grid-template-columns: 1fr; }
-    }
-
-    .btn-estatico {
-      width: 100%;
-      margin-top: 20px;
-      background: var(--border);
-      color: var(--text-muted);
-      border: 2px dashed var(--border);
-      cursor: not-allowed;
-    }
-    .btn-hidratado {
-      background: var(--green-dark) !important;
-      color: #fff !important;
-      border: 2px solid var(--green-main) !important;
-      cursor: pointer !important;
     }
   </style>
 </head>
@@ -455,13 +440,18 @@
           <div class="clock-time" id="clockTime">00:00:00</div>
         </div>
         <div class="cards-grid">
-          <div class="card"><div class="card-body"><h3>📍 Ubicación</h3><p>Av. Gamer 1234</p></div></div>
-          <div class="card"><div class="card-body"><h3>📞 Teléfono</h3><p>+591 700-12345</p></div></div>
-        </div>
-
-        <div id="contenedorMenu" data-hidratado="false" style="margin-top: 20px; border-top: 1px dashed var(--border); padding-top: 20px;">
-          <h3 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px;">Simulación SSR (Hidratación)</h3>
-          <button id="btnPWA" class="btn btn-block btn-estatico">Cargando Menú...</button>
+          <div class="card">
+            <div class="card-body">
+              <h3>📘 Facebook</h3>
+              <p>@RagnarokEsports</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <h3>📸 Instagram</h3>
+              <p>@ragnarok_esports</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -543,6 +533,7 @@
   </div>
 </div>
 
+<!-- ENLACE AL ARCHIVO JS SEPARADO -->
 <script src="ver5.js" defer></script>
 
 </body>
