@@ -79,10 +79,39 @@ if ('serviceWorker' in navigator) {
       return;
     }
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    info.textContent = ios
+    const texto = ios
       ? 'En Safari toca el botón Compartir y elige “Agregar a pantalla de inicio”.'
       : 'Abre el menú del navegador (⋮) y elige “Instalar aplicación” o “Agregar a pantalla de inicio”. Si no aparece, recarga la página e inténtalo de nuevo.';
+    info.textContent = texto;
     modal.style.display = 'flex';
+
+    // Diagnóstico: muestra qué ve el navegador de la PWA
+    const existe = async (u) => {
+      try { return (await fetch(u, { cache: 'no-store' })).ok; } catch (e) { return false; }
+    };
+    const estado = [];
+    const link = document.querySelector('link[rel="manifest"]');
+    let manifest = null;
+    if (link) {
+      try {
+        const r = await fetch(link.href, { cache: 'no-store' });
+        if (r.ok) manifest = await r.json();
+      } catch (e) {}
+    }
+    estado.push(manifest ? '✅ manifest.json encontrado' : '❌ manifest.json no se encontró o no es válido');
+    if (manifest) {
+      for (const ic of (manifest.icons || [])) {
+        if (!(await existe(new URL(ic.src, link.href).href))) estado.push('❌ falta el ícono ' + ic.src);
+      }
+    }
+    estado.push((await existe('sw.js')) ? '✅ sw.js encontrado' : '❌ sw.js no se encontró');
+    let reg = null;
+    if ('serviceWorker' in navigator) {
+      try { reg = await navigator.serviceWorker.getRegistration(); } catch (e) {}
+    }
+    estado.push(reg && reg.active ? '✅ service worker activo' : '❌ service worker no activo');
+    estado.push(window.isSecureContext ? '✅ conexión segura (https)' : '❌ la página no está en una conexión segura');
+    info.textContent = texto + '\n\nDiagnóstico (ver6.js v3):\n' + estado.join('\n');
   });
 
   modal.addEventListener('click', (e) => {
